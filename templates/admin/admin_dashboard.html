@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.admin_dashboard') }}">
+                <i class="fas fa-user-shield me-2" style="color: #20c997;"></i> {# Font Awesome Admin Shield Icon for Logo #}
+                Admin Dashboard
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#parking-lot-management">Manage Lots</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#registered-users">View Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#parking-summary-charts">Summary Charts</a>
+                    </li>
+                </ul>
+                <a class="btn btn-outline-light" href="{{ url_for('admin_bp.admin_logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">Welcome, Admin!</h1>
+
+                {# Flash messages section #}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+            </div>
+        </div>
+
+        <!-- Section to manage Parking Lots -->
+        <div class="card mb-4 shadow-sm" id="parking-lot-management">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-warehouse me-2" style="color: #ffffff;"></i> {# Font Awesome Warehouse Icon #}
+                    Parking Lot Management
+                </h4>
+                <a href="{{ url_for('admin_bp.create_lot') }}" class="btn btn-success">Create New Lot</a>
+            </div>
+            <div class="card-body">
+                {% if parking_lots %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Location Name</th>
+                                <th>Price</th>
+                                <th>Address</th>
+                                <th>Pincode</th>
+                                <th>Max Spots</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lot in parking_lots %}
+                            <tr>
+                                <td>{{ lot[0] }}</td> {# id #}
+                                <td>{{ lot[1] }}</td> {# prime_location_name #}
+                                <td>${{ lot[2] | round(2) }}</td> {# price, formatted to 2 decimal places #}
+                                <td>{{ lot[3] }}</td> {# address #}
+                                <td>{{ lot[4] }}</td> {# pincode #}
+                                <td>{{ lot[5] }}</td> {# maximum_number_of_spots #}
+                                <td>
+                                    <a href="{{ url_for('admin_bp.edit_lot', lot_id=lot[0]) }}" class="btn btn-sm btn-warning me-1">Edit</a>
+                                    <form action="{{ url_for('admin_bp.delete_lot', lot_id=lot[0]) }}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this parking lot? This action cannot be undone.');">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No parking lots created yet. Click "Create New Lot" to add one.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section to view Parking Spot Status -->
+        <div class="card mb-4 shadow-sm" id="parking-spot-status">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-car-side me-2" style="color: #ffffff;"></i> {# Font Awesome Car Side Icon #}
+                    Parking Spot Status
+                </h4>
+            </div>
+            <div class="card-body">
+                {# Search form for parking spots #}
+                <form action="{{ url_for('admin_bp.admin_dashboard') }}" method="get" class="mb-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search by Spot ID or Lot Name" name="search_query" value="{{ request.args.get('search_query', '') }}">
+                        <button class="btn btn-outline-secondary" type="submit">Search</button>
+                        {% if request.args.get('search_query') %}
+                        <a href="{{ url_for('admin_bp.admin_dashboard') }}" class="btn btn-outline-danger">Clear Search</a>
+                        {% endif %}
+                    </div>
+                </form>
+
+                {% if parking_spots %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Spot ID</th>
+                                <th>Parking Lot</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for spot in parking_spots %}
+                            <tr>
+                                <td>{{ spot[0] }}</td> {# spot id #}
+                                <td>{{ spot[1] }}</td> {# prime_location_name from parking_lots #}
+                                <td>
+                                    {% if spot[2] == 'A' %}
+                                        <span class="badge bg-success">Available</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Occupied</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No parking spots available or matching your search. Create a parking lot to generate spots.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section to view Registered Users -->
+        <div class="card mb-4 shadow-sm" id="registered-users">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-users me-2" style="color: #ffffff;"></i> {# Font Awesome Users Icon #}
+                    Registered Users
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if registered_users %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Username</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in registered_users %}
+                            <tr>
+                                <td>{{ user[0] }}</td> {# user id #}
+                                <td>{{ user[1] }}</td> {# username #}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No users registered yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section for Admin Summary Charts -->
+        <div class="card mb-4 shadow-sm" id="parking-summary-charts">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-bar me-2" style="color: #ffffff;"></i> {# Font Awesome Bar Chart Icon #}
+                    Parking Summary Charts
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h5>Overall Spot Status</h5>
+                        <canvas id="overallSpotStatusChart"></canvas>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5>Spots per Parking Lot</h5>
+                        <canvas id="spotsPerLotChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Overall Spot Status Chart (Pie Chart)
+        const overallCtx = document.getElementById('overallSpotStatusChart').getContext('2d');
+        const overallSpotStatusChart = new Chart(overallCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Available', 'Occupied'],
+                datasets: [{
+                    label: 'Spot Status',
+                    data: [{{ total_available_spots }}, {{ total_occupied_spots }}],
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)', // Green for Available
+                        'rgba(220, 53, 69, 0.8)'  // Red for Occupied
+                    ],
+                    borderColor: [
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Overall Parking Spot Status'
+                    }
+                }
+            }
+        });
+
+        // Spots per Parking Lot Chart (Bar Chart)
+        const spotsPerLotData = JSON.parse('{{ spots_per_lot_data | tojson | safe }}');
+
+        const lotNames = spotsPerLotData.map(lot => lot[0]); // Extract location names
+        const availableCounts = spotsPerLotData.map(lot => lot[1]); // Extract available counts
+        const occupiedCounts = spotsPerLotData.map(lot => lot[2]); // Extract occupied counts
+
+        const spotsPerLotCtx = document.getElementById('spotsPerLotChart').getContext('2d');
+        const spotsPerLotChart = new Chart(spotsPerLotCtx, {
+            type: 'bar',
+            data: {
+                labels: lotNames,
+                datasets: [
+                    {
+                        label: 'Available Spots',
+                        data: availableCounts,
+                        backgroundColor: 'rgba(40, 167, 69, 0.8)', // Green
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Occupied Spots',
+                        data: occupiedCounts,
+                        backgroundColor: 'rgba(220, 53, 69, 0.8)', // Red
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Available vs. Occupied Spots per Parking Lot'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true, // Stack bars to show total spots
+                    },
+                    y: {
+                        stacked: true, // Stack bars to show total spots
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Spots'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+/* Basic styling for the body */
+body {
+    font-family: 'Inter', sans-serif; /* Using Inter font as per guidelines */
+    background-color: #f8f9fa; /* Light background */
+    color: #343a40; /* Default text color */
+}
+
+/* Navbar styling */
+.navbar {
+    background-color: #343a40 !important; /* Dark background for navbar */
+    border-bottom: 3px solid #20c997; /* Teal accent border */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ffffff !important;
+}
+
+.nav-link {
+    color: #e9ecef !important;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #20c997 !important; /* Teal on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+}
+
+.btn-outline-light {
+    border-color: #e9ecef;
+    color: #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    background-color: #e9ecef;
+    color: #343a40;
+    transform: translateY(-1px);
+}
+
+/* Container spacing */
+.container.mt-4 {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Heading styling */
+h1, h2, h3, h4, h5, h6 {
+    color: #343a40;
+    margin-bottom: 1rem;
+}
+
+/* Card styling */
+.card {
+    border-radius: 0.75rem; /* Rounded corners for all cards */
+    border: none; /* Remove default border */
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); /* Soft shadow */
+    overflow: hidden; /* Ensures rounded corners are respected by content */
+}
+
+.card-header {
+    background-color: #20c997; /* Teal header */
+    color: #ffffff;
+    font-weight: bold;
+    padding: 1rem 1.5rem;
+    border-bottom: none; /* Remove default border-bottom */
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Table styling */
+.table {
+    margin-bottom: 0; /* Remove bottom margin from table inside card */
+    border-collapse: separate; /* Required for border-radius on table cells */
+    border-spacing: 0; /* Required for border-radius on table cells */
+}
+
+.table thead th {
+    background-color: #e9ecef; /* Light gray header */
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem 1.5rem; /* More padding for table headers */
+}
+
+.table tbody tr td {
+    padding: 0.75rem 1.5rem; /* More padding for table cells */
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.03); /* Lighter stripe */
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(32, 201, 151, 0.1); /* Light teal hover effect */
+}
+
+/* Button styling */
+.btn {
+    border-radius: 0.5rem; /* Consistent rounded corners */
+    font-weight: 500; /* Slightly bolder text */
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #20c997; /* Teal */
+    border-color: #20c997;
+}
+
+.btn-primary:hover {
+    background-color: #17a2b8; /* Darker teal */
+    border-color: #17a2b8;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(32,201,151,0.2);
+}
+
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(40,167,69,0.2);
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #343a40; 
+}
+
+.btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(255,193,7,0.2);
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(220,53,69,0.2);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(108,117,125,0.2);
+}
+
+/* Badge styling */
+.badge {
+    padding: 0.5em 0.75em;
+    border-radius: 0.5rem;
+    font-weight: bold; /* Make badges a bit bolder */
+}
+
+/* Input group styling for search */
+.input-group .form-control {
+    border-top-left-radius: 0.5rem;
+    border-bottom-left-radius: 0.5rem;
+    border-color: #ced4da; /* Default border color */
+}
+
+.input-group .btn {
+    border-top-right-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
+}
+
+/* Alert messages */
+.alert {
+    border-radius: 0.5rem;
+    font-weight: 500;
+}
+
+/* Adjust chart canvas size */
+canvas {
+    max-width: 100%;
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* Specific styling for login/register cards */
+.container.d-flex.justify-content-center.align-items-center {
+    background: linear-gradient(to right, #20c997, #17a2b8); /* Gradient background for login/register pages (teal to darker teal) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensure it covers full viewport height */
+}
+
+.container.d-flex.justify-content-center.align-items-center .card {
+    background: #ffffff; /* White background for the card */
+    padding: 2rem;
+    border-radius: 1rem; /* More rounded corners for login/register card */
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.2); /* Stronger shadow */
+}
+
+.container.d-flex.justify-content-center.align-items-center .card h2 {
+    color: #20c997; /* Teal heading */
+    margin-bottom: 1.5rem;
+}
+
+.container.d-flex.justify-content-center.align-items-center .card a {
+    color: #20c997; /* Teal links */
+    text-decoration: none;
+}
+
+.container.d-flex.justify-content-center.align-items-center .card a:hover {
+    text-decoration: underline;
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create New Parking Lot</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('admin_bp.admin_dashboard') }}">Admin Dashboard</a> {# CHANGED HERE: Added 'admin_bp.' #}
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_bp.admin_dashboard') }}">Manage Lots</a> {# CHANGED HERE: Added 'admin_bp.' #}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_bp.admin_dashboard') }}">View Users</a> {# CHANGED HERE: Added 'admin_bp.' #}
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_bp.admin_dashboard') }}">Summary Charts</a> {# CHANGED HERE: Added 'admin_bp.' #}
+                    </li>
+                </ul>
+                <a class="btn btn-outline-light" href="{{ url_for('admin_bp.admin_logout') }}">Logout</a> {# CHANGED HERE: Added 'admin_bp.' #}
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h4 class="mb-0">Create New Parking Lot</h4>
+                    </div>
+                    <div class="card-body">
+                        <form action="{{ url_for('admin_bp.create_lot') }}" method="post"> {# CHANGED HERE: Added 'admin_bp.' #}
+                            <div class="mb-3">
+                                <label for="prime_location_name" class="form-label">Location Name</label>
+                                <input type="text" class="form-control" id="prime_location_name" name="prime_location_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Price per Hour</label>
+                                <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <input type="text" class="form-control" id="address" name="address" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="pincode" class="form-label">Pincode</label>
+                                <input type="text" class="form-control" id="pincode" name="pincode" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="maximum_number_of_spots" class="form-label">Maximum Spots</label>
+                                <input type="number" class="form-control" id="maximum_number_of_spots" name="maximum_number_of_spots" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Lot</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS CDN (optional, but good practice) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

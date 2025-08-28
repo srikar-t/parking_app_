@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Font Awesome CDN for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('user_bp.user_dashboard') }}">User Dashboard</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#available-parking-lots">Find Parking</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#my-parking-bookings">My Bookings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#my-parking-summary">Summary</a>
+                    </li>
+                </ul>
+                <a class="btn btn-outline-light" href="{{ url_for('user_bp.user_logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="fas fa-car me-2" style="color: #20c997;"></i> {# Font Awesome Car Icon #}
+                    Welcome, {{ session.get('username', 'User') }}!
+                </h1>
+
+                {# Flash messages section #}
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+
+        <!-- Section to Choose Available Parking Lot -->
+        <div class="card mb-4 shadow-sm" id="available-parking-lots">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-parking me-2" style="color: #ffffff;"></i> {# Font Awesome Parking Icon #}
+                    Available Parking Lots
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if available_parking_lots %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Location Name</th>
+                                <th>Address</th>
+                                <th>Price/Hour</th>
+                                <th>Total Spots</th>
+                                <th>Available Spots</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for lot in available_parking_lots %}
+                            <tr>
+                                <td>{{ lot[1] }}</td> {# prime_location_name #}
+                                <td>{{ lot[3] }}</td> {# address #}
+                                <td>${{ lot[2] | round(2) }}</td> {# price #}
+                                <td>{{ lot[5] }}</td> {# maximum_number_of_spots #}
+                                <td>
+                                    {% if lot[6] > 0 %}
+                                        <span class="badge bg-success">{{ lot[6] }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Full</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if lot[6] > 0 %} {# Only show book button if spots are available #}
+                                    <form action="{{ url_for('user_bp.book_spot', lot_id=lot[0]) }}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-primary">Book Spot</button>
+                                    </form>
+                                    {% else %}
+                                    <button type="button" class="btn btn-sm btn-secondary" disabled>Full</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No parking lots available at the moment.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section for User's Current/Past Bookings -->
+        <div class="card mb-4 shadow-sm" id="my-parking-bookings">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2" style="color: #ffffff;"></i> {# Font Awesome Calendar Icon #}
+                    My Parking Bookings
+                </h4>
+            </div>
+            <div class="card-body">
+                <h5>Current Booking:</h5>
+                {% if current_booking %}
+                <div class="table-responsive mb-4">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Spot ID</th>
+                                <th>Parking Lot</th>
+                                <th>Parked At</th>
+                                <th>Price/Hour</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ current_booking[0] }}</td> {# booking_id #}
+                                <td>{{ current_booking[1] }}</td> {# spot_id #}
+                                <td>{{ current_booking[2] }}</td> {# prime_location_name #}
+                                <td>{{ current_booking[3] }}</td> {# parking_timestamp #}
+                                <td>${{ current_booking[4] | round(2) }}</td> {# price #}
+                                <td>
+                                    <form action="{{ url_for('user_bp.release_spot', booking_id=current_booking[0]) }}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to release this spot?');">Release Spot</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">You currently have no active parking bookings.</p>
+                {% endif %}
+
+                <h5 class="mt-4">Past Bookings:</h5>
+                {% if past_bookings %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Spot ID</th>
+                                <th>Parking Lot</th>
+                                <th>Parked At</th>
+                                <th>Released At</th>
+                                <th>Cost/Unit</th>
+                                <th>Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in past_bookings %}
+                            <tr>
+                                <td>{{ booking[0] }}</td> {# booking_id #}
+                                <td>{{ booking[1] }}</td> {# spot_id #}
+                                <td>{{ booking[2] }}</td> {# prime_location_name #}
+                                <td>{{ booking[3] }}</td> {# parking_timestamp #}
+                                <td>{{ booking[4] }}</td> {# leaving_timestamp #}
+                                <td>${{ booking[5] | round(2) }}</td> {# parking_cost_per_unit #}
+                                <td>${{ booking[6] | round(2) }}</td> {# total_cost #}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">You have no past parking bookings.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Section for User's Parking Summary Charts -->
+        <div class="card mb-4 shadow-sm" id="my-parking-summary">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-chart-pie me-2" style="color: #ffffff;"></i> {# Font Awesome Chart Icon #}
+                    My Parking Summary
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <h5>Total Parking Cost & Hours</h5>
+                        <canvas id="userSummaryPieChart"></canvas>
+                        <p class="text-center mt-2">Total Cost: ${{ total_parking_cost | round(2) }}</p>
+                        <p class="text-center">Total Hours Parked: {{ total_parking_hours | round(2) }}</p>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <h5>Bookings per Parking Lot</h5>
+                        <canvas id="userBookingsPerLotChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // User Summary Pie Chart (Total Cost vs. Hours)
+        const userSummaryCtx = document.getElementById('userSummaryPieChart').getContext('2d');
+        const userSummaryPieChart = new Chart(userSummaryCtx, {
+            type: 'doughnut', // Doughnut chart is a good choice for this
+            data: {
+                labels: ['Total Cost', 'Total Hours Parked'],
+                datasets: [{
+                    data: [{{ total_parking_cost | round(2) }}, {{ total_parking_hours | round(2) }}],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.8)', // Blue for Cost
+                        'rgba(255, 159, 64, 0.8)'  // Orange for Hours
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Your Parking Overview'
+                    }
+                }
+            }
+        });
+
+        // User Bookings per Parking Lot Chart (Bar Chart)
+        const userBookingsPerLotData = JSON.parse('{{ user_bookings_per_lot_data | tojson | safe }}');
+
+        const userLotNames = userBookingsPerLotData.map(item => item[0]); // Extract lot names
+        const userBookingCounts = userBookingsPerLotData.map(item => item[1]); // Extract booking counts
+
+        const userBookingsPerLotCtx = document.getElementById('userBookingsPerLotChart').getContext('2d');
+        const userBookingsPerLotChart = new Chart(userBookingsPerLotCtx, {
+            type: 'bar',
+            data: {
+                labels: userLotNames,
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: userBookingCounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)', // Teal
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false // No legend needed for single dataset
+                    },
+                    title: {
+                        display: true,
+                        text: 'Your Bookings per Parking Lot'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        precision: 0, // Ensure integer ticks
+                        title: {
+                            display: true,
+                            text: 'Number of Bookings'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
